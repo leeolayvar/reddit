@@ -92,6 +92,25 @@ func GetComments(h *Headline) (Comments, error) {
 	return helper.comments, nil
 }
 
+//A simply hacked addition to the library
+func GetSubredditComments(subreddit string) (Comments, error) {
+	url := fmt.Sprintf("http://www.reddit.com/r/%s/comments.json", subreddit)
+	body, err := getResponse(url, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := json.NewDecoder(body)
+	var interf interface{}
+	if err = r.Decode(&interf); err != nil {
+		return nil, err
+	}
+	helper := new(Helper)
+	helper.buildComments(interf)
+
+	return helper.comments, nil
+}
+
 //Recursive function to find the fields we want and build the Comments
 //Way too hackish for my likes
 func (h *Helper) buildComments(inf interface{}) {
